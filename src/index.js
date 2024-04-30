@@ -5,6 +5,7 @@ const { EventEmitter } = require('events');
 const OrbitError = require('./OrbitError');
 const WebSocketManager = require('./WebSocketManager');
 const ConfigManager = require('./ConfigManager');
+const debug = require('debug')('bhyve-api');
 
 /**
  * Returns the current timestamp in ISO format.
@@ -68,11 +69,7 @@ class Client extends EventEmitter {
         headers: { 'orbit-session-token': this.#token },
       };
 
-      if (config.debug) {
-        console.log(
-          `${ts()} - response.data: ${JSON.stringify(response.data)}`,
-        );
-      }
+      debug(`response.data: ${JSON.stringify(response.data)}`);
 
       this.emit('authenticated', true);
       this.emit('user_id', this.#userId);
@@ -81,16 +78,12 @@ class Client extends EventEmitter {
       const error = new OrbitError('Failed to connect to Orbit API', {
         originalError: err,
       });
-      if (config.debug) {
-        console.log(`${ts()} - error ${error}`);
-        if (error.statusCode) {
-          console.log(`${ts()} - HTTP Status: ${error.statusCode}`);
-        }
-        if (error.responseBody) {
-          console.log(
-            `${ts()} - Response Body: ${JSON.stringify(error.responseBody)}`,
-          );
-        }
+      debug(`error ${error}`);
+      if (error.statusCode) {
+        debug(`HTTP Status: ${error.statusCode}`);
+      }
+      if (error.responseBody) {
+        debug(`Response Body: ${JSON.stringify(error.responseBody)}`);
       }
       this.emit('error', error);
     }
@@ -105,18 +98,12 @@ class Client extends EventEmitter {
       const response = await axios
         .create(this.#restConfig)
         .get(`/v1/devices?user_id=${this.#userId}`);
-      if (config.debug) {
-        console.log(
-          `${ts()} - devices response.data: ${JSON.stringify(response.data)}`,
-        );
-      }
+      debug(`devices response.data: ${JSON.stringify(response.data)}`);
       this.#deviceId = response.data[0].id;
       this.emit('devices', response.data);
       this.emit('device_id', this.#deviceId);
     } catch (err) {
-      if (config.debug) {
-        console.log(`${ts()} - error: ${err}`);
-      }
+      debug(`error: ${err}`);
       this.emit('error', err);
     }
   }
@@ -136,13 +123,7 @@ class Client extends EventEmitter {
         event: 'app_connection',
         orbit_session_token: this.#token,
       };
-      if (config.debug) {
-        console.log(
-          `${ts()} - websocket authenticate message: ${JSON.stringify(
-            message,
-          )}`,
-        );
-      }
+      debug(`websocket authenticate message: ${JSON.stringify(message)}`);
       this.#stream.send(message);
     });
 
@@ -161,9 +142,7 @@ class Client extends EventEmitter {
 
     // Handle close events
     this.#stream.on('close', (num, reason) => {
-      if (config.debug) {
-        console.log(`${ts()} - close: ${num} reason: ${reason}`);
-      }
+      debug(`close: ${num} reason: ${reason}`);
     });
 
     // Handle unexpected response

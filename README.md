@@ -62,7 +62,6 @@ Initializes a new Orbit client.
 - `config` - A configuration object:
   - `email`: User's email for authentication. (required - _string_)
   - `password`: User's password for authentication. (required - _string_)
-  - `debug`: Enable debugging (boolean). (optional - _string_ - default: false)
   - `baseURL`: API base URL. (optional - _string_ - default: https://api.orbitbhyve.com)
   - `timeout`: Request timeout in milliseconds. (optional - _integer_ - default: 10000)
   - `wssURL`: WebSocket URL. (optional - _string_ - default: wss://api.orbitbhyve.com/v1/events)
@@ -116,6 +115,40 @@ orbitClient.on('error', (error) => {
   }
 });
 ```
+
+## Debug
+
+This packages uses the [debug](https://www.npmjs.com/package/debug) package for NPM to enable additional logging detail.
+
+#### Enabling Debug Output
+
+To see the debug output, you must set the `DEBUG` environment variable to include the namespace `bhyve-api` you want to enable. For your application, you can enable it by running:
+
+```bash
+DEBUG=bhyve-api node yourscript.js
+```
+
+This will enable debug logging for anything under the `bhyve-api` namespace.
+
+#### Controlling Output
+
+You can enable multiple debug namespaces simultaneously by separating them with a comma, or use `*` as a wildcard to enable all debugging:
+
+```bash
+DEBUG=bhyve-api,another-namespace node yourscript.js
+```
+
+or
+
+```bash
+DEBUG=* node yourscript.js
+```
+
+#### Best Practices
+
+1. **Selective Logging**: Use specific namespaces for different parts of your application. For instance, `bhyve-api:auth` for authentication logs, `bhyve-api:ws` for WebSocket logs, etc.
+2. **Security**: Avoid logging sensitive information. If necessary, sanitize the data before logging it.
+3. **Performance**: Keep in mind that excessive logging can impact performance. Use it judiciously, especially in production environments.
 
 ## Contributing
 
