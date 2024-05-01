@@ -112,9 +112,13 @@ class Client extends EventEmitter {
    */
   connectStream() {
     const config = this.configManager.getConfig();
-    this.#stream = new WebSocketManager(config.wssURL, {
-      handshakeTimeout: config.wsTimeout,
-    });
+    this.#stream = new WebSocketManager(
+      config.wssURL,
+      {
+        handshakeTimeout: config.wsTimeout,
+      },
+      debug,
+    );
 
     // Handle open event with custom logic
     this.#stream.on('open', () => {
