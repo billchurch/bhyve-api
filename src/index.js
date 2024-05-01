@@ -2,10 +2,10 @@
 
 const axios = require('axios');
 const { EventEmitter } = require('events');
+const debug = require('debug')('bhyve-api');
 const OrbitError = require('./OrbitError');
 const WebSocketManager = require('./WebSocketManager');
 const ConfigManager = require('./ConfigManager');
-const debug = require('debug')('bhyve-api');
 
 /**
  * Returns the current timestamp in ISO format.
@@ -93,7 +93,6 @@ class Client extends EventEmitter {
    * Fetches and emits the list of devices associated with the authenticated user.
    */
   async devices() {
-    const config = this.configManager.getConfig(); // Retrieve current configuration
     try {
       const response = await axios
         .create(this.#restConfig)
