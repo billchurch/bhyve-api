@@ -1,8 +1,8 @@
 // WebSocketManager.js
-const { EventEmitter } = require('events');
-const WebSocket = require('ws');
+import { EventEmitter } from 'events';
+import WebSocket from 'ws';
 
-class WebSocketManager extends EventEmitter {
+export default class WebSocketManager extends EventEmitter {
   constructor(url, options, debug, pingInterval = 25000) {
     super();
     this.url = url;
@@ -130,5 +130,3 @@ class WebSocketManager extends EventEmitter {
     this.debug('close: WebSocket connection closed.');
   }
 }
-
-module.exports = WebSocketManager;

@@ -1,11 +1,13 @@
 // index.js
 
-const axios = require('axios');
-const { EventEmitter } = require('events');
-const debug = require('debug')('bhyve-api');
-const OrbitError = require('./OrbitError');
-const WebSocketManager = require('./WebSocketManager');
-const ConfigManager = require('./ConfigManager');
+import axios from 'axios';
+import { EventEmitter } from 'events';
+import debugLib from 'debug';
+import OrbitError from './OrbitError.js';
+import WebSocketManager from './WebSocketManager.js';
+import ConfigManager from './ConfigManager.js';
+
+const debug = debugLib('bhyve-api');
 
 /**
  * Returns the current timestamp in ISO format.
@@ -179,4 +181,4 @@ class Client extends EventEmitter {
   }
 }
 
-module.exports = Client;
+export default Client;

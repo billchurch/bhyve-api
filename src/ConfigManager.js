@@ -1,5 +1,5 @@
 // ConfigManager.js
-class ConfigManager {
+export default class ConfigManager {
   static defaultConfig = {
     wssURL: 'wss://api.orbitbhyve.com/v1/events',
     baseURL: 'https://api.orbitbhyve.com',
@@ -19,5 +19,3 @@ class ConfigManager {
     return this.config;
   }
 }
-
-module.exports = ConfigManager;

@@ -17,6 +17,7 @@
     "orbit",
     "irrigation"
   ],
+  "type": "module",
   "author": "Bill Church",
   "license": "MIT",
   "bugs": {

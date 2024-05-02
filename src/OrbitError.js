@@ -1,5 +1,5 @@
 // OrbitError.js
-class OrbitError extends Error {
+export default class OrbitError extends Error {
   constructor(message, { originalError, data } = {}) {
     super(message);
     this.name = 'OrbitError';
@@ -10,5 +10,3 @@ class OrbitError extends Error {
     this.data = data;
   }
 }
-
-module.exports = OrbitError;
