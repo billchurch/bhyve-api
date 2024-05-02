@@ -1,7 +1,9 @@
 // tests/client.test.js
-import Client from '../src/index';
-import { create, post, get } from 'axios';
-import { EventEmitter } from 'events';
+const axios = require('axios');
+const { EventEmitter } = require('events');
+const Client = require('../src/index');
+
+const { create, post, get } = axios;
 
 // Before your tests
 jest.mock('../src/WebSocketManager', () => {

@@ -4,7 +4,9 @@
   "description": "Unofficial interface to Orbit B-hyve API for Node.js",
   "main": "src/index.js",
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "release": "standard-version",
+    "postrelease": "git push --follow-tags origin main && npm publish"
   },
   "repository": {
     "type": "git",
