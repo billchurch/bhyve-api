@@ -43,6 +43,7 @@ class Client extends EventEmitter {
    * @param {Object} newConfig Configuration to update before connecting.
    */
   async connect(newConfig = {}) {
+    debug('connect');
     if (Object.keys(newConfig).length > 0) {
       this.configManager.updateConfig(newConfig);
     }
@@ -69,22 +70,15 @@ class Client extends EventEmitter {
         headers: { 'orbit-session-token': this.#token },
       };
 
-      debug(`response.data: ${JSON.stringify(response.data)}`);
+      debug(`connect response.data: ${JSON.stringify(response.data)}`);
 
       this.emit('authenticated', true);
       this.emit('user_id', this.#userId);
     } catch (err) {
-      console.log(`${ts()} - error: ${err}`);
       const error = new OrbitError('Failed to connect to Orbit API', {
         originalError: err,
       });
-      debug(`error ${error}`);
-      if (error.statusCode) {
-        debug(`HTTP Status: ${error.statusCode}`);
-      }
-      if (error.responseBody) {
-        debug(`Response Body: ${JSON.stringify(error.responseBody)}`);
-      }
+      debug(`connect error ${JSON.stringify(error)}`);
       this.emit('error', error);
     }
   }
@@ -102,8 +96,11 @@ class Client extends EventEmitter {
       this.emit('devices', response.data);
       this.emit('device_id', this.#deviceId);
     } catch (err) {
-      debug(`error: ${err}`);
-      this.emit('error', err);
+      debug(`devices error: ${err}`);
+      const error = new OrbitError('Failed to fetch devices', {
+        originalError: err,
+      });
+      this.emit('error', error);
     }
   }
 
@@ -156,11 +153,11 @@ class Client extends EventEmitter {
           request,
         )} response: ${JSON.stringify(response)}`,
       );
-      console.error(
-        `${ts()} - unexpected-response / request: ${JSON.stringify(
-          request,
-        )} response: ${JSON.stringify(response)}`,
-      );
+      const error = new OrbitError('Unexpected response from WebSocket', {
+        request: JSON.stringify(request),
+        response: JSON.stringify(response),
+      });
+      this.emit('error', error);
     });
   }
 
@@ -172,8 +169,8 @@ class Client extends EventEmitter {
     debug(`send: ${JSON.stringify(message)}`);
     try {
       this.#stream.send(message);
-      console.log(`send json: ${JSON.stringify(message)}`);
     } catch (err) {
+      this.emit('error', err);
       throw new OrbitError('Sending message failed', {
         originalError: err,
         message,
