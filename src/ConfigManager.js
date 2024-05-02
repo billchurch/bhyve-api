@@ -9,10 +9,12 @@ export default class ConfigManager {
 
   constructor(customConfig = {}) {
     this.config = { ...ConfigManager.defaultConfig, ...customConfig };
+    Object.freeze(this.config); // Freeze the configuration object
   }
 
   updateConfig(newConfig) {
-    this.config = { ...this.config, ...newConfig };
+    // When updating, ensure the result is also immutable
+    this.config = Object.freeze({ ...this.config, ...newConfig });
   }
 
   getConfig() {
