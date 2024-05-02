@@ -111,6 +111,7 @@ class Client extends EventEmitter {
    * Sets up and manages the WebSocket connection for real-time communication.
    */
   connectStream() {
+    debug('connectStream');
     const config = this.configManager.getConfig();
     this.#stream = new WebSocketManager(
       config.wssURL,
@@ -126,7 +127,7 @@ class Client extends EventEmitter {
         event: 'app_connection',
         orbit_session_token: this.#token,
       };
-      debug(`websocket authenticate message: ${JSON.stringify(message)}`);
+      debug(`stream.on open: authenticate message: ${JSON.stringify(message)}`);
       this.#stream.send(message);
     });
 
@@ -145,11 +146,16 @@ class Client extends EventEmitter {
 
     // Handle close events
     this.#stream.on('close', (num, reason) => {
-      debug(`close: ${num} reason: ${reason}`);
+      debug(`stream.on close: ${num} reason: ${reason}`);
     });
 
     // Handle unexpected response
     this.#stream.on('unexpected-response', (request, response) => {
+      debug(
+        `stream.on unexpected-response / request: ${JSON.stringify(
+          request,
+        )} response: ${JSON.stringify(response)}`,
+      );
       console.error(
         `${ts()} - unexpected-response / request: ${JSON.stringify(
           request,
@@ -163,6 +169,7 @@ class Client extends EventEmitter {
    * @param {Object} message The message object to send.
    */
   send(message) {
+    debug(`send: ${JSON.stringify(message)}`);
     try {
       this.#stream.send(message);
       console.log(`send json: ${JSON.stringify(message)}`);

@@ -4,7 +4,6 @@ const WebSocket = require('ws');
 
 class WebSocketManager extends EventEmitter {
   constructor(url, options, debug, pingInterval = 25000) {
-    // Default ping interval to 25 seconds
     super();
     this.url = url;
     this.options = options;
@@ -14,29 +13,61 @@ class WebSocketManager extends EventEmitter {
     this.reconnectInterval = 1000;
     this.maxReconnectInterval = 30000;
     this.reconnectAttempts = 0;
-    this.connect();
     this.debug = debug;
+    this.messageCount = 0;
+    this.debug(
+      `Constructor initialized with URL: ${this.url} and ping interval: ${this.pingInterval}`,
+    );
+    this.connect();
   }
 
   connect() {
+    if (this.stream) {
+      if (
+        this.stream.readyState === WebSocket.OPEN ||
+        this.stream.readyState === WebSocket.CONNECTING
+      ) {
+        this.debug(
+          'connect: Existing WebSocket connection is still active. Skipping new connection.',
+        );
+        return;
+      }
+      this.clearListeners(); // Clear listeners of the old connection
+    }
     this.stream = new WebSocket(this.url, this.options);
+    this.debug('connect: Connecting to WebSocket...');
     this.setupListeners();
     this.startPing();
   }
 
+  clearListeners() {
+    if (this.stream) {
+      this.stream.removeAllListeners();
+    }
+  }
+
   setupListeners() {
     this.stream.on('open', () => {
+      this.debug('stream.on open: WebSocket connection opened.');
       this.emit('open');
       this.reconnectAttempts = 0;
       this.reconnectInterval = 1000;
       this.startPing(); // Start the ping process on open
     });
-    this.stream.on('message', (data) => this.emit('message', data));
+    this.stream.on('message', (data) => {
+      this.messageCount = +1;
+      this.debug(`stream.on message #${this.messageCount}: ${data}`);
+      this.emit('message', data);
+    });
     this.stream.on('error', (err) => {
+      this.debug(`stream.on error: ${JSON.stringify(err)}`);
       this.emit('error', err);
       this.stopPing();
     });
     this.stream.on('close', (code, reason) => {
+      this.debug(
+        `stream.on close: WebSocket closed with code: ${code}, reason: ${reason}`,
+      );
       this.emit('close', code, reason);
       this.handleReconnect();
       this.stopPing();
@@ -45,11 +76,11 @@ class WebSocketManager extends EventEmitter {
 
   startPing() {
     this.stopPing(); // Clear existing interval
+    this.debug('startPing: Set Ping interval.');
     this.pingIntervalId = setInterval(() => {
       if (this.stream.readyState === WebSocket.OPEN) {
         const pingMessage = { event: 'ping' };
-        this.debug(`Sending ping message: ${JSON.stringify(pingMessage)}`);
-        this.stream.send(JSON.stringify(pingMessage));
+        this.send(pingMessage);
       }
     }, this.pingInterval);
   }
@@ -58,6 +89,7 @@ class WebSocketManager extends EventEmitter {
     if (this.pingIntervalId) {
       clearInterval(this.pingIntervalId);
       this.pingIntervalId = null;
+      this.debug('stopPing: Unset ping interval.');
     }
   }
 
@@ -69,6 +101,9 @@ class WebSocketManager extends EventEmitter {
           this.reconnectAttempts,
           this.reconnectInterval,
         );
+        this.debug(
+          `handleReconnect: Attempting to reconnect. Attempt: ${this.reconnectAttempts}`,
+        );
         this.connect();
         this.reconnectInterval *= 2;
         if (this.reconnectInterval > this.maxReconnectInterval) {
@@ -78,11 +113,13 @@ class WebSocketManager extends EventEmitter {
       }, this.reconnectInterval);
     } else {
       this.emit('max_reconnect_attempts_reached');
+      this.debug('handleReconnect: Maximum reconnect attempts reached.');
     }
   }
 
   send(data) {
     if (this.stream.readyState === WebSocket.OPEN) {
+      this.debug(`WebSocketManager send: ${JSON.stringify(data)}`);
       this.stream.send(JSON.stringify(data));
     }
   }
@@ -90,6 +127,7 @@ class WebSocketManager extends EventEmitter {
   close() {
     this.stopPing();
     this.stream.close();
+    this.debug('close: WebSocket connection closed.');
   }
 }
 
