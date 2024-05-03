@@ -1,4 +1,4 @@
-// ConfigManager.js
+// src/ConfigManager.js
 export default class ConfigManager {
   static defaultConfig = {
     wssURL: 'wss://api.orbitbhyve.com/v1/events',
@@ -9,7 +9,7 @@ export default class ConfigManager {
 
   constructor(customConfig = {}) {
     this.config = { ...ConfigManager.defaultConfig, ...customConfig };
-    Object.freeze(this.config); // Freeze the configuration object
+    Object.freeze(this.config); // Freeze the configuration object to make immutable
   }
 
   updateConfig(newConfig) {
@@ -18,6 +18,7 @@ export default class ConfigManager {
   }
 
   getConfig() {
-    return this.config;
+    // Return a copy of the configuration object
+    return Object.freeze({ ...this.config });
   }
 }
