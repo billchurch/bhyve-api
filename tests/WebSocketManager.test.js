@@ -34,19 +34,19 @@ describe('WebSocketManager', () => {
 
   it('should instantiate with valid parameters', () => {
     const wsManager = new WebSocketManager(
-      'ws://example.com',
+      'wss://api.orbitbhyve.com/v1/events',
       {},
       debugStub,
       25000,
     );
 
-    expect(wsManager.url).to.equal('ws://example.com');
+    expect(wsManager.url).to.equal('wss://api.orbitbhyve.com/v1/events');
     // Add assertions for other parameters...
   });
 
   it('should connect to WebSocket server', () => {
     const wsManager = new WebSocketManager(
-      'ws://example.com',
+      'wss://api.orbitbhyve.com/v1/events',
       {},
       debugStub,
       25000,
@@ -58,7 +58,7 @@ describe('WebSocketManager', () => {
   // it('should attempt to reconnect after closing', function (done) {
   //   this.timeout(5000); // Extend timeout for asynchronous operations
 
-  //   const wsManager = new WebSocketManager('ws://example.com', {}, debugStub);
+  //   const wsManager = new WebSocketManager('wss://api.orbitbhyve.com/v1/events', {}, debugStub);
 
   //   // Mock the stream after the WebSocketManager is instantiated
   //   wsManager.stream = new EventEmitter();
@@ -78,7 +78,11 @@ describe('WebSocketManager', () => {
   // });
 
   it('should start ping interval and send ping messages', () => {
-    const wsManager = new WebSocketManager('ws://example.com', {}, debugStub);
+    const wsManager = new WebSocketManager(
+      'wss://api.orbitbhyve.com/v1/events',
+      {},
+      debugStub,
+    );
     wsManager.stream = new EventEmitter();
     wsManager.stream.readyState = WebSocket.OPEN;
     wsManager.stream.send = sinon.stub();
@@ -94,7 +98,11 @@ describe('WebSocketManager', () => {
   });
 
   it('should clear listeners and stop ping on close', () => {
-    const wsManager = new WebSocketManager('ws://example.com', {}, debugStub);
+    const wsManager = new WebSocketManager(
+      'wss://api.orbitbhyve.com/v1/events',
+      {},
+      debugStub,
+    );
     wsManager.stream = new EventEmitter();
     wsManager.stream.readyState = WebSocket.OPEN;
     wsManager.stream.close = sinon.stub();
