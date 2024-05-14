@@ -1,3 +1,4 @@
+/* eslint-disable import/extensions */
 // index.js
 
 import axios from 'axios';
@@ -8,12 +9,6 @@ import WebSocketManager from './WebSocketManager.js';
 import ConfigManager from './ConfigManager.js';
 
 const debug = debugLib('bhyve-api');
-
-/**
- * Returns the current timestamp in ISO format.
- * @returns {string} Current timestamp as an ISO string.
- */
-const ts = () => new Date().toISOString();
 
 /**
  * Client class that manages connections and interactions with the Orbit API.
@@ -50,25 +45,26 @@ class Client extends EventEmitter {
       this.configManager.updateConfig(newConfig);
     }
 
-    const config = this.configManager.getConfig();
+    const { baseURL, timeout, email, password } =
+      this.configManager.getConfig();
     try {
       const response = await axios
         .create({
-          baseURL: config.baseURL,
-          timeout: config.timeout,
+          baseURL,
+          timeout,
         })
         .post('/v1/session', {
           session: {
-            email: config.email,
-            password: config.password,
+            email,
+            password,
           },
         });
 
       this.#token = response.data.orbit_session_token;
       this.#userId = response.data.user_id;
       this.#restConfig = {
-        baseURL: config.baseURL,
-        timeout: config.timeout,
+        baseURL,
+        timeout,
         headers: { 'orbit-session-token': this.#token },
       };
 
