@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.1.1](https://github.com/billchurch/bhyve-api/compare/v1.1.0...v1.1.1) (2024-05-16)
+
+
+### Bug Fixes
+
+* better error and debug messages ([b9b459d](https://github.com/billchurch/bhyve-api/commit/b9b459db236666701b9b5e46bb33ac7b0c1b1fa5))
+* object immutability incorrect in ConfigManager ([6dcf5a9](https://github.com/billchurch/bhyve-api/commit/6dcf5a9066a45067a5c93cfcedebebd3d3d3745f))
+
 ## [1.1.0](https://github.com/billchurch/bhyve-api/compare/v1.0.0...v1.1.0) (2024-05-02)
 
 
