@@ -5,7 +5,7 @@
   "main": "src/index.js",
   "scripts": {
     "test": "mocha --require @babel/register --require esm",
-    "release": "standard-version",
+    "release": "standard-version -s",
     "postrelease": "git push --follow-tags origin main && npm publish"
   },
   "repository": {
