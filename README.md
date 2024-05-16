@@ -144,12 +144,6 @@ or
 DEBUG=* node yourscript.js
 ```
 
-#### Best Practices
-
-1. **Selective Logging**: Use specific namespaces for different parts of your application. For instance, `bhyve-api:auth` for authentication logs, `bhyve-api:ws` for WebSocket logs, etc.
-2. **Security**: Avoid logging sensitive information. If necessary, sanitize the data before logging it.
-3. **Performance**: Keep in mind that excessive logging can impact performance. Use it judiciously, especially in production environments.
-
 ## Contributing
 
 Contributions are welcome! Please refer to the repository's [issues page](https://github.com/billchurch/bhyve-api/issues) for things to work on, or create your own issues.
