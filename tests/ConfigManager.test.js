@@ -1,19 +1,18 @@
 // test/ConfigManager.test.js
- 
-/* global describe, it */
 
-import { expect } from 'chai';
+import { test, describe } from 'node:test';
+import assert from 'node:assert/strict';
 import ConfigManager from '../src/ConfigManager.js';
 
-describe('ConfigManager', () => {
-  it('should instantiate with default configuration', () => {
+describe('ConfigManager', async () => {
+  test('should instantiate with default configuration', () => {
     const configManager = new ConfigManager();
     const config = configManager.getConfig();
 
-    expect(config).to.deep.equal(ConfigManager.defaultConfig);
+    assert.deepStrictEqual(config, ConfigManager.defaultConfig);
   });
 
-  it('should instantiate with custom configuration', () => {
+  test('should instantiate with custom configuration', () => {
     const customConfig = {
       wssURL: 'wss://custom-url.com',
       baseURL: 'https://custom-url.com',
@@ -24,13 +23,13 @@ describe('ConfigManager', () => {
     const configManager = new ConfigManager(customConfig);
     const config = configManager.getConfig();
 
-    expect(config).to.deep.equal({
+    assert.deepStrictEqual(config, {
       ...ConfigManager.defaultConfig,
       ...customConfig,
     });
   });
 
-  it('should update configuration', () => {
+  test('should update configuration', () => {
     const configManager = new ConfigManager();
     const newConfig = {
       wssURL: 'wss://updated-url.com',
@@ -40,16 +39,16 @@ describe('ConfigManager', () => {
     configManager.updateConfig(newConfig);
     const updatedConfig = configManager.getConfig();
 
-    expect(updatedConfig).to.deep.equal({
+    assert.deepStrictEqual(updatedConfig, {
       ...ConfigManager.defaultConfig,
       ...newConfig,
     });
   });
 
-  it('should ensure immutability of configuration', () => {
+  test('should ensure immutability of configuration', () => {
     const configManager = new ConfigManager();
     const config = configManager.getConfig();
 
-    expect(Object.isFrozen(config)).to.be.true;
+    assert.strictEqual(Object.isFrozen(config), true);
   });
 });

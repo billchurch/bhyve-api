@@ -1,23 +1,22 @@
 // test/OrbitError.test.js
- 
-/* global describe, it */
 
-import { expect } from 'chai';
+import test from 'node:test';
+import assert from 'node:assert';
 import OrbitError from '../src/OrbitError.js';
 
-describe('OrbitError', () => {
-  it('should instantiate with a message and no additional data', () => {
+test('OrbitError', async (t) => {
+  await t.test('should instantiate with a message and no additional data', () => {
     const errorMessage = 'An error occurred.';
     const orbitError = new OrbitError(errorMessage);
 
-    expect(orbitError.message).to.equal(errorMessage);
-    expect(orbitError.name).to.equal('OrbitError');
-    expect(orbitError.statusCode).to.be.undefined;
-    expect(orbitError.responseBody).to.be.undefined;
-    expect(orbitError.data).to.be.undefined;
+    assert.strictEqual(orbitError.message, errorMessage);
+    assert.strictEqual(orbitError.name, 'OrbitError');
+    assert.strictEqual(orbitError.statusCode, undefined);
+    assert.strictEqual(orbitError.responseBody, undefined);
+    assert.strictEqual(orbitError.data, undefined);
   });
 
-  it('should instantiate with a message and original error data', () => {
+  await t.test('should instantiate with a message and original error data', () => {
     const errorMessage = 'An error occurred.';
     const originalError = {
       response: {
@@ -28,18 +27,18 @@ describe('OrbitError', () => {
 
     const orbitError = new OrbitError(errorMessage, { originalError });
 
-    expect(orbitError.message).to.equal(errorMessage);
-    expect(orbitError.name).to.equal('OrbitError');
-    expect(orbitError.statusCode).to.equal(404);
-    expect(orbitError.responseBody).to.deep.equal({ message: 'Not found' });
-    expect(orbitError.data).to.be.undefined;
+    assert.strictEqual(orbitError.message, errorMessage);
+    assert.strictEqual(orbitError.name, 'OrbitError');
+    assert.strictEqual(orbitError.statusCode, 404);
+    assert.deepStrictEqual(orbitError.responseBody, { message: 'Not found' });
+    assert.strictEqual(orbitError.data, undefined);
   });
 
-  it('should allow accessing properties after instantiation', () => {
+  await t.test('should allow accessing properties after instantiation', () => {
     const errorMessage = 'An error occurred.';
     const orbitError = new OrbitError(errorMessage);
 
-    expect(orbitError.message).to.equal(errorMessage);
+    assert.strictEqual(orbitError.message, errorMessage);
 
     // Update properties after instantiation
     orbitError.name = 'CustomError';
@@ -47,12 +46,12 @@ describe('OrbitError', () => {
     orbitError.responseBody = { message: 'Internal Server Error' };
     orbitError.data = { additionalInfo: 'Some additional information' };
 
-    expect(orbitError.name).to.equal('CustomError');
-    expect(orbitError.statusCode).to.equal(500);
-    expect(orbitError.responseBody).to.deep.equal({
+    assert.strictEqual(orbitError.name, 'CustomError');
+    assert.strictEqual(orbitError.statusCode, 500);
+    assert.deepStrictEqual(orbitError.responseBody, {
       message: 'Internal Server Error',
     });
-    expect(orbitError.data).to.deep.equal({
+    assert.deepStrictEqual(orbitError.data, {
       additionalInfo: 'Some additional information',
     });
   });

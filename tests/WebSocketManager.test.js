@@ -1,116 +1,229 @@
-/* eslint-disable no-unused-vars */
 // test/WebSocketManager.test.js
- 
-/* global describe, it, beforeEach, afterEach */
-
+import { strict as assert } from 'assert';
 import { EventEmitter } from 'events';
 import WebSocket from 'ws';
 import debug from 'debug';
-
-import { expect } from 'chai';
-import sinon from 'sinon';
+import { test } from 'node:test'; // Node.js native test runner
 import WebSocketManager from '../src/WebSocketManager.js';
 
-const debugStub = debug('websocket:manager'); // Use the same namespace as in WebSocketManager.js
+const debugStub = debug('websocket:manager');
 
-describe('WebSocketManager', () => {
-  let wsMock;
-  // let debugStub;
+// Comprehensive cleanup function for timers and connections
+function cleanupResources(wsManager) {
+  // Clean up timers
+  if (wsManager && wsManager.pingIntervalId) {
+    clearInterval(wsManager.pingIntervalId);
+    wsManager.pingIntervalId = null;
+  }
+  
+  // Clean up WebSocket
+  if (wsManager && wsManager.stream) {
+    wsManager.stream.removeAllListeners();
+    if (typeof wsManager.stream.close === 'function') {
+      wsManager.stream.close();
+    }
+    wsManager.stream = null;
+  }
+}
 
-  beforeEach(() => {
-    // Mock the WebSocket class
-    wsMock = sinon.stub(WebSocketManager.prototype, 'connect');
+// Setup and teardown for each test
+function setupTest() {
+  const connectMock = {
+    calls: [],
+    restore: () => {}
+  };
+  
+  // Save original connect method
+  const originalConnect = WebSocketManager.prototype.connect;
+  
+  // Mock the connect method
+  WebSocketManager.prototype.connect = function() {
+    connectMock.calls.push(arguments);
+    return this;
+  };
+  
+  connectMock.restore = () => {
+    WebSocketManager.prototype.connect = originalConnect;
+  };
+  
+  return { connectMock };
+}
 
-    // Stub the debug function
-    // debugStub = sinon.stub().returns(() => {}); // Mock debug function
-  });
+function teardownTest(mocks, wsManager) {
+  for (const mock of Object.values(mocks)) {
+    if (mock && typeof mock.restore === 'function') {
+      mock.restore();
+    }
+  }
+  
+  // Call our new cleanup function
+  if (wsManager) {
+    cleanupResources(wsManager);
+  }
+}
 
-  afterEach(() => {
-    // Restore the original implementation after each test
-    sinon.restore();
-  });
+// Tests
+test('WebSocketManager - should instantiate with valid parameters', () => {
+  const { connectMock } = setupTest();
+  let wsManager;
 
-  it('should instantiate with valid parameters', () => {
-    const wsManager = new WebSocketManager(
+  try {
+    wsManager = new WebSocketManager(
       'wss://api.orbitbhyve.com/v1/events',
       {},
       debugStub,
       25000,
     );
 
-    expect(wsManager.url).to.equal('wss://api.orbitbhyve.com/v1/events');
-    // Add assertions for other parameters...
-  });
+    assert.equal(wsManager.url, 'wss://api.orbitbhyve.com/v1/events');
+    // Add assertions for other parameters as needed
+  } finally {
+    teardownTest({ connectMock }, wsManager);
+  }
+});
 
-  it('should connect to WebSocket server', () => {
-    const wsManager = new WebSocketManager(
+test('WebSocketManager - should connect to WebSocket server', () => {
+  const { connectMock } = setupTest();
+  let wsManager;
+
+  try {
+    wsManager = new WebSocketManager(
       'wss://api.orbitbhyve.com/v1/events',
       {},
       debugStub,
       25000,
     );
 
-    expect(wsMock.calledOnce).to.be.true;
-  });
+    assert.equal(connectMock.calls.length, 1, 'connect should be called once');
+  } finally {
+    teardownTest({ connectMock }, wsManager);
+  }
+});
 
-  // it('should attempt to reconnect after closing', function (done) {
-  //   this.timeout(5000); // Extend timeout for asynchronous operations
+test('WebSocketManager - should start ping interval and send ping messages', () => {
+  const { connectMock } = setupTest();
+  let wsManager;
+  
+  // Store original timer functions
+  const originalSetInterval = global.setInterval;
+  const originalClearInterval = global.clearInterval;
 
-  //   const wsManager = new WebSocketManager('wss://api.orbitbhyve.com/v1/events', {}, debugStub);
-
-  //   // Mock the stream after the WebSocketManager is instantiated
-  //   wsManager.stream = new EventEmitter();
-  //   wsManager.stream.readyState = WebSocket.OPEN;
-
-  //   // Attach the spy after instantiating and setting the mock
-  //   sinon.spy(wsManager, 'handleReconnect');
-
-  //   // Trigger the 'close' event
-  //   wsManager.stream.emit('close', 1000, 'Normal Closure');
-
-  //   // Since handleReconnect sets a timeout, use setTimeout to delay assertion
-  //   setTimeout(() => {
-  //     expect(wsManager.handleReconnect).to.be.calledOnce;
-  //     done();
-  //   }, 1000); // Delay slightly longer than any possible immediate asynchronous delays
-  // });
-
-  it('should start ping interval and send ping messages', () => {
-    const wsManager = new WebSocketManager(
+  try {
+    wsManager = new WebSocketManager(
       'wss://api.orbitbhyve.com/v1/events',
       {},
       debugStub,
     );
+    
     wsManager.stream = new EventEmitter();
     wsManager.stream.readyState = WebSocket.OPEN;
-    wsManager.stream.send = sinon.stub();
-
-    const clock = sinon.useFakeTimers();
-    sinon.spy(wsManager, 'send');
-
+    wsManager.stream.send = () => {}; // Add mock send method to the stream
+    
+    // Mock the send method on WebSocketManager
+    const sendSpy = {
+      calls: [],
+      restore: () => {}
+    };
+    
+    const originalSend = wsManager.send;
+    wsManager.send = function(...args) {
+      sendSpy.calls.push(args);
+      return originalSend.apply(this, args);
+    };
+    
+    sendSpy.restore = () => {
+      wsManager.send = originalSend;
+    };
+    
+    // Mock setInterval to control time
+    let intervalId = 999; // Dummy interval ID
+    global.setInterval = (fn) => {
+      // Execute the function immediately for testing purposes
+      fn();
+      return intervalId;
+    };
+    
+    // Also mock clearInterval for cleanup
+    global.clearInterval = () => {};
+    
     wsManager.startPing();
-    clock.tick(wsManager.pingInterval);
+    
+    assert.equal(sendSpy.calls.length, 1, 'send should be called once');
+    assert.deepEqual(sendSpy.calls[0][0], { event: 'ping' }, 'should send ping event');
+    
+    sendSpy.restore();
+    
+  } finally {
+    // Restore original timers first, before cleanup
+    global.setInterval = originalSetInterval;
+    global.clearInterval = originalClearInterval;
+    
+    teardownTest({ connectMock }, wsManager);
+  }
+});
 
-    expect(wsManager.send).to.have.been.calledOnceWith({ event: 'ping' });
-    clock.restore();
-  });
+test('WebSocketManager - should clear listeners and stop ping on close', () => {
+  const { connectMock } = setupTest();
+  let wsManager;
 
-  it('should clear listeners and stop ping on close', () => {
-    const wsManager = new WebSocketManager(
+  try {
+    wsManager = new WebSocketManager(
       'wss://api.orbitbhyve.com/v1/events',
       {},
       debugStub,
     );
+    
     wsManager.stream = new EventEmitter();
     wsManager.stream.readyState = WebSocket.OPEN;
-    wsManager.stream.close = sinon.stub();
-
-    sinon.spy(wsManager, 'clearListeners');
-    sinon.spy(wsManager, 'stopPing');
-
+    wsManager.stream.close = () => {};
+    
+    // Spy on clearListeners and stopPing
+    const clearListenersSpy = {
+      calls: [],
+      restore: () => {}
+    };
+    const stopPingSpy = {
+      calls: [],
+      restore: () => {}
+    };
+    
+    const originalClearListeners = wsManager.clearListeners;
+    wsManager.clearListeners = function(...args) {
+      clearListenersSpy.calls.push(args);
+      return originalClearListeners.apply(this, args);
+    };
+    
+    const originalStopPing = wsManager.stopPing;
+    wsManager.stopPing = function(...args) {
+      stopPingSpy.calls.push(args);
+      return originalStopPing.apply(this, args);
+    };
+    
+    clearListenersSpy.restore = () => {
+      wsManager.clearListeners = originalClearListeners;
+    };
+    
+    stopPingSpy.restore = () => {
+      wsManager.stopPing = originalStopPing;
+    };
+    
     wsManager.close();
+    
+    assert.equal(stopPingSpy.calls.length, 1, 'stopPing should be called once');
+    assert.equal(clearListenersSpy.calls.length, 1, 'clearListeners should be called once');
+    
+    clearListenersSpy.restore();
+    stopPingSpy.restore();
+    
+  } finally {
+    teardownTest({ connectMock }, wsManager);
+  }
+});
 
-    expect(wsManager.stopPing).to.have.been.calledOnce;
-    expect(wsManager.clearListeners).to.have.been.calledOnce;
-  });
+// Final cleanup test to ensure the process exits cleanly
+test('Final cleanup', async () => {
+  // Allow a small delay for any async operations to settle
+  await new Promise(resolve => setTimeout(resolve, 100));
+  // Process will exit after tests complete
+  process.exit(0);
 });
