@@ -1,7 +1,5 @@
 // test/ConfigManager.test.js
-/* eslint-disable import/extensions */
-/* eslint-disable import/no-extraneous-dependencies */
-/* eslint-disable no-unused-expressions */
+ 
 /* global describe, it */
 
 import { expect } from 'chai';

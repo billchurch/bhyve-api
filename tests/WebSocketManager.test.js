@@ -1,8 +1,6 @@
 /* eslint-disable no-unused-vars */
 // test/WebSocketManager.test.js
-/* eslint-disable import/extensions */
-/* eslint-disable import/no-extraneous-dependencies */
-/* eslint-disable no-unused-expressions */
+ 
 /* global describe, it, beforeEach, afterEach */
 
 import { EventEmitter } from 'events';

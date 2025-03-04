@@ -5,8 +5,11 @@
   "main": "src/index.js",
   "scripts": {
     "test": "mocha --require @babel/register --require esm",
-    "release": "standard-version -s",
-    "postrelease": "git push --follow-tags origin main && npm publish"
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "pretest": "npm run lint:fix",
+    "ci": "npm run test && npm run build",
+    "build": "echo \"No build step needed\""
   },
   "repository": {
     "type": "git",
@@ -25,35 +28,36 @@
   },
   "homepage": "https://github.com/billchurch/bhyve-api#readme",
   "engines": {
-    "node": ">=16.0.0"
+    "node": ">=18.0.0"
   },
   "files": [
-    "src"
+    "src",
+    "LICENSE",
+    "README.md",
+    "CHANGELOG.md"
   ],
   "devDependencies": {
-    "@babel/core": "^7.24.5",
-    "@babel/preset-env": "^7.24.5",
-    "@babel/register": "^7.23.7",
-    "chai": "^5.1.0",
-    "eslint": "^8.57.0",
-    "eslint-config-airbnb-base": "^15.0.0",
-    "eslint-config-prettier": "^8.10.0",
-    "eslint-plugin-import": "^2.29.1",
-    "eslint-plugin-n": "^17.3.1",
-    "eslint-plugin-prettier": "^4.2.1",
+    "@babel/core": "^7.26.9",
+    "@babel/preset-env": "^7.26.9",
+    "@babel/register": "^7.25.9",
+    "chai": "^5.2.0",
+    "eslint": "^9.21.0",
+    "eslint-config-prettier": "^10.0.2",
+    "eslint-plugin-import": "^2.31.0",
+    "eslint-plugin-n": "^17.16.1",
+    "eslint-plugin-prettier": "^5.2.3",
     "esm": "^3.2.25",
     "jsonwebtoken": "^9.0.2",
-    "mocha": "^10.4.0",
-    "prettier": "^2.8.8",
-    "sinon": "^17.0.1",
-    "sinon-chai": "^3.7.0",
-    "standard-version": "^9.5.0"
+    "mocha": "^11.1.0",
+    "prettier": "^3.5.3",
+    "sinon": "^19.0.2",
+    "sinon-chai": "^4.0.0"
   },
   "dependencies": {
-    "axios": "^1.6.8",
-    "debug": "^4.3.4",
+    "axios": "^1.8.1",
+    "debug": "^4.4.0",
     "events": "^3.3.0",
-    "ws": "^8.17.0"
+    "ws": "^8.18.1"
   },
   "legacyPeerDeps": true,
   "mocha": {

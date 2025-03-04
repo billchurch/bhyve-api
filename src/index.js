@@ -1,4 +1,3 @@
-/* eslint-disable import/extensions */
 // index.js
 
 import axios from 'axios';
