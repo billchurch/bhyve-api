@@ -37,7 +37,12 @@ jobs:
       - run: npm run build
         if: ${{ steps.release.outputs.release_created }}
 
-      - run: npm publish --access public
+      - name: Publish to npm
+        run: npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN }}
-        if: ${{ steps.release.outputs.release_created }}
+        if: ${{ steps.release.outputs.release_created && secrets.NODE_AUTH_TOKEN != '' }}
+
+      - name: Skip publish when token missing
+        if: ${{ steps.release.outputs.release_created && secrets.NODE_AUTH_TOKEN == '' }}
+        run: echo "NODE_AUTH_TOKEN is not configured; skipping npm publish step."
