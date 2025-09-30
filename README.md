@@ -65,6 +65,8 @@ Initializes a new Orbit client.
   - `baseURL`: API base URL. (optional - _string_ - default: https://api.orbitbhyve.com)
   - `timeout`: Request timeout in milliseconds. (optional - _integer_ - default: 10000)
   - `wssURL`: WebSocket URL. (optional - _string_ - default: wss://api.orbitbhyve.com/v1/events)
+  - `maxContentLength`: Maximum number of response bytes Axios will process. (optional - _integer_ - default: 10485760)
+  - `maxBodyLength`: Maximum number of request bytes Axios will send. (optional - _integer_ - default: 10485760)
 
 ### Events
 

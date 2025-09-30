@@ -5,6 +5,13 @@ export default class ConfigManager {
     baseURL: 'https://api.orbitbhyve.com',
     timeout: 10000,
     debug: false,
+    /**
+     * Limit the maximum size of responses and request bodies processed by Axios.
+     * These defaults mitigate potential denial-of-service vectors caused by
+     * unbounded payload sizes.
+     */
+    maxContentLength: 10 * 1024 * 1024, // 10 MB
+    maxBodyLength: 10 * 1024 * 1024, // 10 MB
   };
 
   constructor(customConfig = {}) {

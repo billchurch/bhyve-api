@@ -44,13 +44,22 @@ class Client extends EventEmitter {
       this.configManager.updateConfig(newConfig);
     }
 
-    const { baseURL, timeout, email, password } =
+    const {
+      baseURL,
+      timeout,
+      email,
+      password,
+      maxContentLength,
+      maxBodyLength,
+    } =
       this.configManager.getConfig();
     try {
       const response = await axios
         .create({
           baseURL,
           timeout,
+          maxContentLength,
+          maxBodyLength,
         })
         .post('/v1/session', {
           session: {
@@ -64,6 +73,8 @@ class Client extends EventEmitter {
       this.#restConfig = {
         baseURL,
         timeout,
+        maxContentLength,
+        maxBodyLength,
         headers: { 'orbit-session-token': this.#token },
       };
 
