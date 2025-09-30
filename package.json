@@ -46,7 +46,7 @@
     "prettier": "^3.5.3"
   },
   "dependencies": {
-    "axios": "^1.8.1",
+    "axios": "^1.12.2",
     "debug": "^4.4.0",
     "events": "^3.3.0",
     "ws": "^8.18.1"

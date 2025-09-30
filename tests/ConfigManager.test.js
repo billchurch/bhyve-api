@@ -45,6 +45,20 @@ describe('ConfigManager', async () => {
     });
   });
 
+  test('should override payload size limits when provided', () => {
+    const overrides = {
+      maxContentLength: 1024,
+      maxBodyLength: 2048,
+    };
+
+    const configManager = new ConfigManager(overrides);
+
+    assert.deepStrictEqual(configManager.getConfig(), {
+      ...ConfigManager.defaultConfig,
+      ...overrides,
+    });
+  });
+
   test('should ensure immutability of configuration', () => {
     const configManager = new ConfigManager();
     const config = configManager.getConfig();
