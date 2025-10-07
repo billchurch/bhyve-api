@@ -24,6 +24,7 @@ export default class WebSocketManager extends EventEmitter {
     this.reconnectInterval = 1000;
     this.maxReconnectInterval = 30000;
     this.reconnectAttempts = 0;
+    this.shouldReconnect = true;
     this.debug = debug;
     this.messageCount = 0;
     this.debug(
@@ -44,6 +45,7 @@ export default class WebSocketManager extends EventEmitter {
    * Connects to the WebSocket server.
    */
   connect() {
+    this.shouldReconnect = true;
     if (this.stream) {
       if (
         this.stream.readyState === WebSocket.OPEN ||
@@ -66,6 +68,7 @@ export default class WebSocketManager extends EventEmitter {
    * Closes the WebSocket connection.
    */
   close() {
+    this.shouldReconnect = false;
     if (this.stream) {
       this.stopPing(); // Stop any ongoing pinging
       this.clearListeners(); // Clear all event listeners from the stream
@@ -143,6 +146,10 @@ export default class WebSocketManager extends EventEmitter {
    * Handles reconnection attempts after a WebSocket disconnection.
    */
   handleReconnect() {
+    if (!this.shouldReconnect) {
+      this.debug('handleReconnect: Reconnection disabled, skipping reconnect.');
+      return;
+    }
     if (this.reconnectAttempts < 5) {
       setTimeout(() => {
         this.emit(
@@ -161,6 +168,7 @@ export default class WebSocketManager extends EventEmitter {
         this.reconnectAttempts += 1;
       }, this.reconnectInterval);
     } else {
+      this.shouldReconnect = false;
       this.emit('max_reconnect_attempts_reached');
       this.debug('handleReconnect: Maximum reconnect attempts reached.');
     }
