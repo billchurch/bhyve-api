@@ -220,6 +220,149 @@ test('WebSocketManager - should clear listeners and stop ping on close', () => {
   }
 });
 
+test('WebSocketManager - should stop reconnection after max attempts', async () => {
+  const { connectMock } = setupTest();
+  let wsManager;
+
+  try {
+    wsManager = new WebSocketManager(
+      'wss://api.orbitbhyve.com/v1/events',
+      {},
+      debugStub,
+    );
+
+    // Mock the stream
+    wsManager.stream = new EventEmitter();
+    wsManager.stream.readyState = WebSocket.CLOSED;
+
+    // Track max_reconnect_attempts_reached event
+    let maxAttemptsReached = false;
+    wsManager.on('max_reconnect_attempts_reached', () => {
+      maxAttemptsReached = true;
+    });
+
+    // Set reconnectAttempts to 5 to trigger max attempts
+    wsManager.reconnectAttempts = 5;
+    wsManager.shouldReconnect = true;
+
+    // Call handleReconnect
+    wsManager.handleReconnect();
+
+    // Verify shouldReconnect is now false
+    assert.equal(wsManager.shouldReconnect, false, 'shouldReconnect should be false after max attempts');
+    assert.equal(maxAttemptsReached, true, 'max_reconnect_attempts_reached event should be emitted');
+  } finally {
+    teardownTest({ connectMock }, wsManager);
+  }
+});
+
+test('WebSocketManager - handleReconnect should respect shouldReconnect flag', async () => {
+  const { connectMock } = setupTest();
+  let wsManager;
+
+  try {
+    wsManager = new WebSocketManager(
+      'wss://api.orbitbhyve.com/v1/events',
+      {},
+      debugStub,
+    );
+
+    // Mock the stream
+    wsManager.stream = new EventEmitter();
+    wsManager.stream.readyState = WebSocket.CLOSED;
+
+    // Set shouldReconnect to false
+    wsManager.shouldReconnect = false;
+    wsManager.reconnectAttempts = 0;
+
+    // Clear previous connect calls
+    connectMock.calls = [];
+
+    // Call handleReconnect
+    wsManager.handleReconnect();
+
+    // Wait a bit to ensure no reconnect is scheduled
+    await new Promise(resolve => setTimeout(resolve, 50));
+
+    // Verify connect was not called
+    assert.equal(connectMock.calls.length, 0, 'connect should not be called when shouldReconnect is false');
+  } finally {
+    teardownTest({ connectMock }, wsManager);
+  }
+});
+
+test('WebSocketManager - close() should disable reconnection', () => {
+  const { connectMock } = setupTest();
+  let wsManager;
+
+  try {
+    wsManager = new WebSocketManager(
+      'wss://api.orbitbhyve.com/v1/events',
+      {},
+      debugStub,
+    );
+
+    // Mock the stream
+    wsManager.stream = new EventEmitter();
+    wsManager.stream.readyState = WebSocket.OPEN;
+    wsManager.stream.close = () => {};
+
+    // Ensure shouldReconnect starts as true
+    assert.equal(wsManager.shouldReconnect, true, 'shouldReconnect should start as true');
+
+    // Call close
+    wsManager.close();
+
+    // Verify shouldReconnect is now false
+    assert.equal(wsManager.shouldReconnect, false, 'shouldReconnect should be false after close()');
+  } finally {
+    teardownTest({ connectMock }, wsManager);
+  }
+});
+
+test('WebSocketManager - connect() should re-enable reconnection', () => {
+  const { connectMock } = setupTest();
+  let wsManager;
+
+  try {
+    wsManager = new WebSocketManager(
+      'wss://api.orbitbhyve.com/v1/events',
+      {},
+      debugStub,
+    );
+
+    // Set shouldReconnect to false to simulate previous max attempts
+    wsManager.shouldReconnect = false;
+
+    // Restore the original connect to test the actual implementation
+    connectMock.restore();
+
+    // Mock the stream setup
+    const originalCreateWebSocket = WebSocketManager.prototype.createWebSocket;
+    WebSocketManager.prototype.createWebSocket = function() {
+      const mockStream = new EventEmitter();
+      mockStream.readyState = WebSocket.CONNECTING;
+      mockStream.close = () => {};
+      mockStream.send = () => {};
+      mockStream.removeAllListeners = EventEmitter.prototype.removeAllListeners;
+      return mockStream;
+    };
+
+    try {
+      // Call connect
+      wsManager.connect();
+
+      // Verify shouldReconnect is now true
+      assert.equal(wsManager.shouldReconnect, true, 'shouldReconnect should be true after connect()');
+    } finally {
+      // Restore original createWebSocket
+      WebSocketManager.prototype.createWebSocket = originalCreateWebSocket;
+    }
+  } finally {
+    teardownTest({}, wsManager);
+  }
+});
+
 // Final cleanup test to ensure the process exits cleanly
 test('Final cleanup', async () => {
   // Allow a small delay for any async operations to settle
