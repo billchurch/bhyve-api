@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.2.3](https://github.com/billchurch/bhyve-api/compare/v1.2.2...v1.2.3) (2026-06-09)
+
+
+### Bug Fixes
+
+* **deps:** resolve all 10 Dependabot security alerts ([7224052](https://github.com/billchurch/bhyve-api/commit/7224052e6cadadeafaad4d0c6c445b9ca3433760))
+* **deps:** resolve npm Dependabot security alerts (5 high, 5 moderate) ([3b9ab49](https://github.com/billchurch/bhyve-api/commit/3b9ab497972d6f1f5c79c7355085608fe9f1fedb))
+
 ## [1.2.2](https://github.com/billchurch/bhyve-api/compare/v1.2.1...v1.2.2) (2025-10-07)
 
 
