@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.2.4](https://github.com/billchurch/bhyve-api/compare/v1.2.3...v1.2.4) (2026-06-09)
+
+
+### Bug Fixes
+
+* **deps:** remove unused eslint plugins incompatible with ESLint 10 ([393c19e](https://github.com/billchurch/bhyve-api/commit/393c19e3168b7625d664e75d0022f7f8111648d7))
+* **deps:** remove unused eslint plugins incompatible with ESLint 10 ([dfdb7c7](https://github.com/billchurch/bhyve-api/commit/dfdb7c7e3616442c170f0a70bbb6ea1c78b79589))
+
 ## [1.2.3](https://github.com/billchurch/bhyve-api/compare/v1.2.2...v1.2.3) (2026-06-09)
 
 
